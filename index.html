@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+    * {
+      box-sizing:border-box
+      }
+
+      body {
+      margin:0;
+      background:#222
+      }
+
+      ul {
+      height:18.875em;
+      width:62em;
+      margin:5em auto;
+      padding:3em 0 0 3em;
+      position:relative;
+      border:1px solid #160801;
+      border-radius:1em;
+      box-shadow:0 0 50px rgba(0,0,0,0.5) inset,0 1px rgba(212,152,125,0.2) inset,0 5px 15px rgba(0,0,0,0.5)
+      }
+
+      li {
+      margin:0;
+      padding:0;
+      list-style:none;
+      position:relative;
+      float:left
+      }
+
+      ul .white {
+      height:16em;
+      width:4em;
+      z-index:1;
+      border-left:1px solid #bbb;
+      border-bottom:1px solid #bbb;
+      border-radius:0 0 5px 5px;
+      box-shadow:-1px 0 0 rgba(255,255,255,0.8) inset,0 0 5px #ccc inset,0 0 3px rgba(0,0,0,0.2);
+      background:linear-gradient(to bottom,#eee 0%,#fff 100%)
+      }
+
+      ul .white.active {
+      border-top:1px solid #777;
+      border-left:1px solid #999;
+      border-bottom:1px solid #999;
+      box-shadow:2px 0 3px rgba(0,0,0,0.1) inset,-5px 5px 20px rgba(0,0,0,0.2) inset,0 0 3px rgba(0,0,0,0.2);
+      background:linear-gradient(to bottom,#fff 0%,#e9e9e9 100%)
+      }
+
+      .black {
+      height:8em;
+      width:2em;
+      margin:0 0 0 -1em;
+      z-index:2;
+      border:1px solid #000;
+      border-radius:0 0 3px 3px;
+      box-shadow:-1px -1px 2px rgba(255,255,255,0.2) inset,0 -5px 2px 3px rgba(0,0,0,0.6) inset,0 2px 4px rgba(0,0,0,0.5);
+      background:linear-gradient(45deg,#222 0%,#555 100%)
+      }
+
+      .black.active {
+      box-shadow:-1px -1px 2px rgba(255,255,255,0.2) inset,0 -2px 2px 3px rgba(0,0,0,0.6) inset,0 1px 2px rgba(0,0,0,0.5);
+      background:linear-gradient(to right,#444 0%,#222 100%)
+      }
+
+      .a,.g,.f,.d,.c {
+      margin:0 0 0 -1em
+      }
+
+      ul li:first-child {
+      border-radius:5px 0 5px 5px
+      }
+
+      ul li:last-child {
+      border-radius:0 5px 5px 5px
+      }
+
+      label {
+        color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div>Basic piano (keys: 1-8)</div>
+        <ul class="set">
+          <li class="white b" id="note_F3"></li>
+          <li class="black as" id="note_F#3"></li>
+          <li class="white a" id="note_G3"></li>
+          <li class="black gs" id="note_G#3"></li>
+          <li class="white g" id="note_A3"></li>
+          <li class="black fs" id="note_A#3"></li>
+          <li class="white f" id="note_B3"></li>
+          <li class="white e" id="note_C4"></li>
+          <li class="black ds" id="note_C#4"></li>
+        	<li class="white d" id="note_D4"></li>
+        	<li class="black cs" id="note_D#4"></li>
+        	<li class="white c" id="note_E4"></li>
+
+          <li class="white b" id="note_F4"></li>
+          <li class="black as" id="note_F#4"></li>
+          <li class="white a" id="note_G4"></li>
+          <li class="black gs" id="note_G#4"></li>
+          <li class="white g" id="note_A4"></li>
+          <li class="black fs" id="note_A#4"></li>
+          <li class="white f" id="note_B4"></li>
+          <li class="white e" id="note_C5"></li>
+          <li class="black ds" id="note_C#5"></li>
+        	<li class="white d" id="note_D5"></li>
+        	<li class="black cs" id="note_D#5"></li>
+        	<li class="white c" id="note_E5"></li>
+        </ul>
+    <div>
+      <label for="songOfTime">Song of Time</label>
+      <button id="songOfTime" type="button">Play</button>
+    </div>
+    <div>
+      <label for=""marioWorld"">Super Mario World -ish</label>
+      <button id="marioWorld" type="button">Play</button>
+    </div>
+    <script type="text/javascript">
+      const fps = 60;
+      const fpsInterval = 1000 / fps;
+      let then = Date.now();
+      let now, elapsed;
+
+      let audioContext, keyboard, songDt, playingSong, currenSong, notes;
+      let marioWorldButton, songOfTimeButton;
+
+      function mainLoop() {
+        keyboard.tick();
+        now = Date.now();
+        elapsed = now - then;
+
+        if (elapsed > fpsInterval) {
+           then = now - (elapsed % fpsInterval);
+
+           if (playingSong) {
+             const soundToPlay = currenSong[songDt] || function() {};
+             soundToPlay();
+             songDt++;
+           }
+        }
+
+        if (keyboard.wasPressed("1")) { notes["note_C4"].click() };
+        if (keyboard.wasPressed("2")) { notes["note_D4"].click() };
+        if (keyboard.wasPressed("3")) { notes["note_E4"].click() };
+        if (keyboard.wasPressed("4")) { notes["note_F4"].click() };
+        if (keyboard.wasPressed("5")) { notes["note_G4"].click() };
+        if (keyboard.wasPressed("6")) { notes["note_A4"].click() };
+        if (keyboard.wasPressed("7")) { notes["note_B4"].click() };
+        if (keyboard.wasPressed("8")) { notes["note_C5"].click() };
+
+        window.requestAnimationFrame(mainLoop);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        marioWorldButton = document.getElementById("marioWorld");
+        songOfTimeButton = document.getElementById("songOfTime");
+
+        notes = {
+          "note_F3"  : document.getElementById("note_F3"),
+          "note_F#3" : document.getElementById("note_F#3"),
+          "note_G3"  : document.getElementById("note_G3"),
+          "note_G#3" : document.getElementById("note_G#3"),
+          "note_A3"  : document.getElementById("note_A3"),
+          "note_A#3" : document.getElementById("note_A#3"),
+          "note_B3"  : document.getElementById("note_B3"),
+          "note_C4"  : document.getElementById("note_C4"),
+          "note_C#4" : document.getElementById("note_C#4"),
+          "note_D4"  : document.getElementById("note_D4"),
+          "note_D#4" : document.getElementById("note_D#4"),
+          "note_E4"  : document.getElementById("note_E4"),
+          "note_F4"  : document.getElementById("note_F4"),
+          "note_F#4" : document.getElementById("note_F#4"),
+          "note_G4"  : document.getElementById("note_G4"),
+          "note_G#4" : document.getElementById("note_G#4"),
+          "note_A4"  : document.getElementById("note_A4"),
+          "note_A#4" : document.getElementById("note_A#4"),
+          "note_B4"  : document.getElementById("note_B4"),
+          "note_C5"  : document.getElementById("note_C5"),
+          "note_C#5" : document.getElementById("note_C#5"),
+          "note_D5"  : document.getElementById("note_D5"),
+          "note_D#5" : document.getElementById("note_D#5"),
+          "note_E5"  : document.getElementById("note_E5")
+        };
+
+        keyboard = new Keyboard(document);
+        setupPiano();
+
+        marioWorldButton.addEventListener("click", e => {
+          currenSong = marioWorldTrack;
+          songDt = 0;
+          playingSong = true;
+        });
+
+        songOfTimeButton.addEventListener("click", e => {
+          currenSong = songOfTimeTrack;
+          songDt = 0;
+          playingSong = true;
+        });
+
+        playingSong = false;
+
+        window.requestAnimationFrame(mainLoop);
+      });
+
+      function setupPiano() {
+        notes["note_F3"].addEventListener("click", e => { playNote(e.target, "F3", 1); });
+        notes["note_F#3"].addEventListener("click", e => { playNote(e.target, "F#3", 1); });
+        notes["note_G3"].addEventListener("click", e => { playNote(e.target, "G3", 1); });
+        notes["note_G#3"].addEventListener("click", e => { playNote(e.target, "G#3", 1); });
+        notes["note_A3"].addEventListener("click", e => { playNote(e.target, "A3", 1); });
+        notes["note_A#3"].addEventListener("click", e => { playNote(e.target, "A#3", 1); });
+        notes["note_B3"].addEventListener("click", e => { playNote(e.target, "B3", 1); });
+        notes["note_C4"].addEventListener("click", e => { playNote(e.target, "C4", 1); });
+        notes["note_C#4"].addEventListener("click", e => { playNote(e.target, "C#4", 1); });
+        notes["note_D4"].addEventListener("click", e => { playNote(e.target, "D4", 1); });
+        notes["note_D#4"].addEventListener("click", e => { playNote(e.target, "D#4", 1); });
+        notes["note_E4"].addEventListener("click", e => { playNote(e.target, "E4", 1); });
+        notes["note_F4"].addEventListener("click", e => { playNote(e.target, "F4", 1); });
+        notes["note_F#4"].addEventListener("click", e => { playNote(e.target, "F#4", 1); });
+        notes["note_G4"].addEventListener("click", e => { playNote(e.target, "G4", 1); });
+        notes["note_G#4"].addEventListener("click", e => { playNote(e.target, "G#4", 1); });
+        notes["note_A4"].addEventListener("click", e => { playNote(e.target, "A4", 1); });
+        notes["note_A#4"].addEventListener("click", e => { playNote(e.target, "A#4", 1); });
+        notes["note_B4"].addEventListener("click", e => { playNote(e.target, "B4", 1); });
+        notes["note_C5"].addEventListener("click", e => { playNote(e.target, "C5", 1); });
+        notes["note_C#5"].addEventListener("click", e => { playNote(e.target, "C#5", 1); });
+        notes["note_D5"].addEventListener("click", e => { playNote(e.target, "D5", 1); });
+        notes["note_D#5"].addEventListener("click", e => { playNote(e.target, "D#5", 1); });
+        notes["note_E5"].addEventListener("click", e => { playNote(e.target, "E5", 1); });
+      }
+
+      function playNote(target, note, time) {
+        if (audioContext === undefined) {
+          audioContext = new AudioContext();
+        }
+
+        let sound = audioContext.createOscillator();
+        let gainNode = audioContext.createGain();
+
+        sound.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        sound.type = "sine";
+        sound.frequency.value = notesFrequencies[note];
+
+        target.classList.add("active");
+        sound.start(0);
+        setTimeout(() => { target.classList.remove("active"); }, 100);
+
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + time);
+      }
+
+      // shitty song structure that does the job
+      const songOfTimeTrack = {
+        0: () => playNote(notes["note_A4"], "A4", 1.25),
+        40: () => playNote(notes["note_D4"], "D4", 1.75),
+        110: () => playNote(notes["note_F4"], "F4", 1.25),
+        150: () => playNote(notes["note_A4"], "A4", 1.25),
+        190: () => playNote(notes["note_D4"], "D4", 1.75),
+        260: () => playNote(notes["note_F4"], "F4", 1.25),
+        295: () => playNote(notes["note_A4"], "A4", 1.25),
+        315: () => playNote(notes["note_C5"], "C5", 1),
+        335: () => playNote(notes["note_B4"], "B4", 1.25),
+        375: () => playNote(notes["note_G4"], "G4", 1.75),
+        410: () => playNote(notes["note_F4"], "F4", 1.25),
+        430: () => playNote(notes["note_G4"], "G4", 1),
+        450: () => playNote(notes["note_A4"], "A4", 1.75),
+        490: () => playNote(notes["note_D4"], "D4", 2.5),
+        525: () => playNote(notes["note_C4"], "C4", 1.75),
+        550: () => playNote(notes["note_E4"], "E4", 2),
+        580: () => playNote(notes["note_D4"], "D4", 3),
+        581: () => { playingSong = false; }
+      };
+
+      const marioWorldTrack = {
+        0: () => playNote(notes["note_B4"], "B4", 1.75),
+        30: () => playNote(notes["note_G4"], "G4", 1.5),
+        55: () => playNote(notes["note_D4"], "D4", 1.25),
+        65: () => playNote(notes["note_E4"], "E4", 1.25),
+        80: () => playNote(notes["note_G4"], "G4", 1.25),
+        95: () => playNote(notes["note_G4"], "G4", 1.5),
+        115: () => playNote(notes["note_D4"], "D4", 1.25),
+        130: () => playNote(notes["note_E4"], "E4", 1.25),
+        145: () => playNote(notes["note_G4"], "G4", 1.25),
+        160: () => playNote(notes["note_G4"], "G4", 1.25),
+        175: () => playNote(notes["note_C5"], "C5", 1.75),
+        190: () => playNote(notes["note_B4"], "B4", 1.75),
+        215: () => playNote(notes["note_A4"], "A4", 2),
+        240: () => playNote(notes["note_D4"], "D4", 1.5),
+        260: () => playNote(notes["note_B4"], "B4", 1.75),
+        290: () => playNote(notes["note_G4"], "G4", 1.5),
+        315: () => playNote(notes["note_D4"], "D4", 1.25),
+        335: () => playNote(notes["note_E4"], "E4", 1.25),
+        350: () => playNote(notes["note_G4"], "G4", 1.25),
+        365: () => playNote(notes["note_G4"], "G4", 1.5),
+        380: () => playNote(notes["note_D4"], "D4", 1.25),
+        395: () => playNote(notes["note_E4"], "E4", 1.25),
+        410: () => playNote(notes["note_G4"], "G4", 1.25),
+        425: () => playNote(notes["note_C5"], "C5", 1),
+        435: () => playNote(notes["note_B4"], "B4", 1),
+        450: () => playNote(notes["note_A4"], "A4", 1),
+        465: () => playNote(notes["note_G4"], "G4", 2),
+        520: () => playNote(notes["note_B4"], "B4", 2),
+        550: () => playNote(notes["note_G4"], "G4", 1.25),
+        575: () => playNote(notes["note_D4"], "D4", 2),
+        595: () => playNote(notes["note_B4"], "B4", 1.25),
+        620: () => playNote(notes["note_G4"], "G4", 2),
+        650: () => playNote(notes["note_B4"], "B4", 1.25),
+        660: () => playNote(notes["note_G4"], "G4", 1.25),
+        680: () => playNote(notes["note_D4"], "D4", 1.25),
+        700: () => playNote(notes["note_B4"], "B4", 1.5),
+        720: () => playNote(notes["note_A4"], "A4", 2),
+        775: () => playNote(notes["note_B4"], "B4", 2),
+        805: () => playNote(notes["note_G4"], "G4", 1.25),
+        830: () => playNote(notes["note_D4"], "D4", 2),
+        850: () => playNote(notes["note_B4"], "B4", 1.25),
+        875: () => playNote(notes["note_G4"], "G4", 2),
+        895: () => playNote(notes["note_B4"], "B4", 1.25),
+        910: () => playNote(notes["note_G4"], "G4", 1.5),
+        925: () => playNote(notes["note_D4"], "D4", 1.25),
+        945: () => playNote(notes["note_C5"], "C5", 2.5),
+        1010: () => playNote(notes["note_B4"], "B4", 1.75),
+        1040: () => playNote(notes["note_G4"], "G4", 1.5),
+        1065: () => playNote(notes["note_D4"], "D4", 1.25),
+        1085: () => playNote(notes["note_E4"], "E4", 1.25),
+        1100: () => playNote(notes["note_G4"], "G4", 1.25),
+        1115: () => playNote(notes["note_G4"], "G4", 1.5),
+        1130: () => playNote(notes["note_D4"], "D4", 1.25),
+        1145: () => playNote(notes["note_E4"], "E4", 1.25),
+        1160: () => playNote(notes["note_G4"], "G4", 1.5),
+        1175: () => playNote(notes["note_C5"], "C5", 1.5),
+        1190: () => playNote(notes["note_B4"], "B4", 1.75),
+        1210: () => playNote(notes["note_A4"], "A4", 2),
+        1225: () => playNote(notes["note_G4"], "G4", 3),
+        1226: () => { playingSong = false; }
+      };
+
+      const notesFrequencies = {
+        "C0": 16.35,
+        "C#0": 17.32,
+        "Db0": 17.32,
+        "D0": 18.35,
+        "D#0": 19.45,
+        "Eb0": 19.45,
+        "E0": 20.60,
+        "F0": 21.83,
+        "F#0": 23.12,
+        "Gb0": 23.12,
+        "G0": 24.50,
+        "G#0": 25.96,
+        "Ab0": 25.96,
+        "A0": 27.50,
+        "A#0": 29.14,
+        "Bb0": 29.14,
+        "B0": 30.87,
+        "C1": 32.70,
+        "C#1": 34.65,
+        "Db1": 34.65,
+        "D1": 36.71,
+        "D#1": 38.89,
+        "Eb1": 38.89,
+        "E1": 41.20,
+        "F1": 43.65,
+        "F#1": 46.25,
+        "Gb1": 46.25,
+        "G1": 49.00,
+        "G#1": 51.91,
+        "Ab1": 51.91,
+        "A1": 55.00,
+        "A#1": 58.27,
+        "Bb1": 58.27,
+        "B1": 61.74,
+        "C2": 65.41,
+        "C#2": 69.30,
+        "Db2": 69.30,
+        "D2": 73.42,
+        "D#2": 77.78,
+        "Eb2": 77.78,
+        "E2": 82.41,
+        "F2": 87.31,
+        "F#2": 92.50,
+        "Gb2": 92.50,
+        "G2": 98.00,
+        "G#2": 103.83,
+        "Ab2": 103.83,
+        "A2": 110.00,
+        "A#2": 116.54,
+        "Bb2": 116.54,
+        "B2": 123.47,
+        "C3": 130.81,
+        "C#3": 138.59,
+        "Db3": 138.59,
+        "D3": 146.83,
+        "D#3": 155.56,
+        "Eb3": 155.56,
+        "E3": 164.81,
+        "F3": 174.61,
+        "F#3": 185.00,
+        "Gb3": 185.00,
+        "G3": 196.00,
+        "G#3": 207.65,
+        "Ab3": 207.65,
+        "A3": 220.00,
+        "A#3": 233.08,
+        "Bb3": 233.08,
+        "B3": 246.94,
+        "C4": 261.63,
+        "C#4": 277.18,
+        "Db4": 277.18,
+        "D4": 293.66,
+        "D#4": 311.13,
+        "Eb4": 311.13,
+        "E4": 329.63,
+        "F4": 349.23,
+        "F#4": 369.99,
+        "Gb4": 369.99,
+        "G4": 392.00,
+        "G#4": 415.30,
+        "Ab4": 415.30,
+        "A4": 440.00,
+        "A#4": 466.16,
+        "Bb4": 466.16,
+        "B4": 493.88,
+        "C5": 523.25,
+        "C#5": 554.37,
+        "Db5": 554.37,
+        "D5": 587.33,
+        "D#5": 622.25,
+        "Eb5": 622.25,
+        "E5": 659.26,
+        "F5": 698.46,
+        "F#5": 739.99,
+        "Gb5": 739.99,
+        "G5": 783.99,
+        "G#5": 830.61,
+        "Ab5": 830.61,
+        "A5": 880.00,
+        "A#5": 932.33,
+        "Bb5": 932.33,
+        "B5": 987.77,
+        "C6": 1046.50,
+        "C#6": 1108.73,
+        "Db6": 1108.73,
+        "D6": 1174.66,
+        "D#6": 1244.51,
+        "Eb6": 1244.51,
+        "E6": 1318.51,
+        "F6": 1396.91,
+        "F#6": 1479.98,
+        "Gb6": 1479.98,
+        "G6": 1567.98,
+        "G#6": 1661.22,
+        "Ab6": 1661.22,
+        "A6": 1760.00,
+        "A#6": 1864.66,
+        "Bb6": 1864.66,
+        "B6": 1975.53,
+        "C7": 2093.00,
+        "C#7": 2217.46,
+        "Db7": 2217.46,
+        "D7": 2349.32,
+        "D#7": 2489.02,
+        "Eb7": 2489.02,
+        "E7": 2637.02,
+        "F7": 2793.83,
+        "F#7": 2959.96,
+        "Gb7": 2959.96,
+        "G7": 3135.96,
+        "G#7": 3322.44,
+        "Ab7": 3322.44,
+        "A7": 3520.00,
+        "A#7": 3729.31,
+        "Bb7": 3729.31,
+        "B7": 3951.07,
+        "C8": 4186.01
+      };
+
+      function Keyboard(document) {
+        this.down = {};
+        this.oldKeys = {};
+        this.newKeys = {};
+
+        document.onkeydown = event => { this.down[event.key] = true; };
+        document.onkeyup = event => { this.down[event.key] = false; };
+
+        this.tick = () => {
+          this.oldKeys = structuredClone(this.newKeys);
+          this.newKeys = structuredClone(this.down);
+        }
+
+        this.isDown = (key) => {
+          return this.newKeys[key] === true;
+        }
+
+        this.wasPressed = (key) => {
+          return this.oldKeys[key] !== true && this.newKeys[key] === true;
+        }
+
+        this.wasReleased = (key) => {
+          return this.oldKeys[key] === true && this.newKeys[key] !== true;
+        }
+      }
+    </script>
+  </body>
+</html>
